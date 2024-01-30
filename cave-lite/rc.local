@@ -1,0 +1,60 @@
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing. Insert updates below
+#########################################################################
+
+# Declare CAVE Directory
+DIR=/home/cave/cave-lite
+script=cave.sh
+
+# Start or Stop CAVE
+cave_start()
+{
+    # Ensure logs directory exists and is writable
+    mkdir -p ${DIR}/logs
+    chmod 777 ${DIR}/logs
+
+    bash ${DIR}/${script} &
+}
+
+cave_stop()
+{
+    pkill -f cave.sh & pkill -f msgIntersect.py & pkill -f tscScript.py
+}
+
+cave_echo()
+{
+    cd ${DIR}/logs/
+    latest_log=$(ls -t *.log | head -1)
+    tail -f $latest_log
+}
+
+mode=$1
+echo "$0 is called with parameter: '$mode'"
+
+case $mode in
+    "start")
+        cave_start
+        ;;
+    "stop")
+        cave_stop
+        ;;
+    "restart")
+        cave_stop
+        cave_start
+        ;;
+    "echo")
+        cave_echo
+        ;;
+    *)
+        ;;
+esac
